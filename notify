@@ -1,0 +1,70 @@
+class AlertLevelCharacteristic(dbus.service.Object):
+    def __init__(self, bus, index, service):
+        self.path = f'{service.get_path()}/char{index}'
+        self.bus = bus
+        self.service = service
+        self.uuid = ALERT_LEVEL_UUID
+        self.flags = ['write-without-response', 'notify']
+        self.notifying = False
+        dbus.service.Object.__init__(self, bus, self.path)
+
+    def get_path(self):
+        return dbus.ObjectPath(self.path)
+
+    def get_properties(self):
+        return {
+            GATT_CHARACTERISTIC_IFACE: {
+                'UUID': self.uuid,
+                'Service': self.service.get_path(),
+                'Flags': dbus.Array(self.flags, signature='s'),
+                'Notifying': dbus.Boolean(self.notifying)
+            }
+        }
+
+    @dbus.service.method(GATT_CHARACTERISTIC_IFACE,
+                         in_signature='', out_signature='')
+    def StartNotify(self):
+        if self.notifying:
+            return
+        self.notifying = True
+        print("[AlertLevelCharacteristic] Notifications enabled")
+
+    @dbus.service.method(GATT_CHARACTERISTIC_IFACE,
+                         in_signature='', out_signature='')
+    def StopNotify(self):
+        if not self.notifying:
+            return
+        self.notifying = False
+        print("[AlertLevelCharacteristic] Notifications disabled")
+
+    def send_notification(self, message):
+        if not self.notifying:
+            return
+        value = [dbus.Byte(ord(c)) for c in message]
+        self.PropertiesChanged(GATT_CHARACTERISTIC_IFACE,
+                               {'Value': dbus.Array(value, signature='y')}, [])
+
+    @dbus.service.signal('org.freedesktop.DBus.Properties',
+                         signature='sa{sv}as')
+    def PropertiesChanged(self, interface, changed, invalidated):
+        pass
+
+    @dbus.service.method(GATT_CHARACTERISTIC_IFACE,
+                         in_signature='aya{sv}', out_signature='')
+    def WriteValue(self, value, options):
+        level = int(value[0])
+        msg = "Unknown Alert"
+        if level == 0:
+            msg = "No Alert"
+        elif level == 1:
+            msg = "Mild Alert"
+        elif level == 2:
+            msg = "High Alert"
+
+        print(f"[AlertLevelCharacteristic] Received alert level: {msg}")
+
+        # Send notification from this characteristic
+        self.send_notification(msg)
+
+        # Also notify via status characteristic
+        self.service.status_char.send_notification(msg)
