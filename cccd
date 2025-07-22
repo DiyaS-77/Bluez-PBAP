@@ -205,12 +205,13 @@ class BluetoothDeviceManager:
         logging.info(f"Command: {command}\nOutput: {output.stdout}")
         return output
 
+#-------------LOGGING------------------------#
     def _watch_log_file(self, log_file, text_browser: QTextBrowser):
         if not log_file or not os.path.exists(log_file) or not text_browser:
             return
 
         if log_file in self._watchers:
-            return  # Already watching
+            return
 
         watcher = QFileSystemWatcher()
         watcher.addPath(log_file)
@@ -396,6 +397,7 @@ class BluetoothDeviceManager:
         self.manufacturer = details.get('Manufacturer')
 
         return details
+
 
     def start_discovery(self):
         """
@@ -1075,10 +1077,9 @@ class BluetoothDeviceManager:
 
         try:
             control_iface =self._get_media_control_interface(address,self.interface)
-            #print(control_iface)
             getattr(control_iface, valid[command])()
             return f"AVRCP {command} sent to {address}"
         except Exception as e:
             return f"Error sending AVRCP {command}: {str(e)}"
 
-            return f"No MediaControl1 interface found under {self.interface} (is device connected via A2DP with AVRCP?)" i did like this but im getting error 
+        return f"No MediaControl1 interface found under {self.interface} (is device connected via A2DP with AVRCP?)"
