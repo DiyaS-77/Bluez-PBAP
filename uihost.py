@@ -7,7 +7,7 @@ import time
 
 
 import psutil
-from PyQt6.QtCore import QTimer
+from PyQt6.QtCore import QTimer, QFileSystemWatcher
 from PyQt6.QtGui import QFont
 from PyQt6.QtCore import Qt
 from PyQt6.QtWidgets import QScrollArea, QListWidgetItem, QGroupBox, QDialog, QHeaderView
@@ -1344,14 +1344,50 @@ class TestApplication(QWidget):
         self.hci_dump_log_text_browser.setStyleSheet(transparent_textedit_style)
 
         # Start bluetoothd logs
-        self.bluez_logger.start_bluetoothd_logs(self.bluetoothd_log_text_browser)
+        self.bluetoothd_log_file_path=self.bluez_logger.start_bluetoothd_logs()
+        self.bluetoothd_log_file_fd=open(self.bluetoothd_log_file_path, "r")
+        if self.bluetoothd_log_file_fd:
+            content=self.bluetoothd_log_file_fd.read()
+            self.bluetoothd_log_text_browser.append(content)
+            self.bluetoothd_file_position=self.bluetoothd_log_file_fd.tell()
+
+        self.file_watcher = QFileSystemWatcher()
+        self.file_watcher.addPath(self.bluetoothd_log_file_path)
+        self.file_watcher.fileChanged.connect(self.update_log)
+        #self.logs_layout.addWidget(self.dump_log_output)
+
 
         # Start pulseaudio logs
 
-        self.bluez_logger.start_pulseaudio_logs(self.pulseaudio_log_text_browser)
+        self.pulseaudio_log_file_path=self.bluez_logger.start_pulseaudio_logs()
+        self.pulseaudio_log_file_fd=open(self.pulseaudio_log_file_path, "r")
+        if self.pulseaudio_log_file_fd:
+            content=self.pulseaudio_log_file_fd.read()
+            self.pulseaudio_log_text_browser.append(content)
+            self.pulseaudio_file_position=self.pulseaudio_log_file_fd.tell()
+
+        self.file_watcher = QFileSystemWatcher()
+        self.file_watcher.addPath(self.pulseaudio_log_file_path)
+        self.file_watcher.fileChanged.connect(self.update_log)
+        #self.logs_layout.addWidget(self.dump_log_output)
+
+
+
 
         # Start HCI dump logs
-        self.bluez_logger.start_dump_logs(interface=self.interface,log_text_browser=self.hci_dump_log_text_browser)
+        self.hci_log_file_path=self.bluez_logger.start_dump_logs(interface=self.interface)
+        self.hci_log_file_fd=open(self.hci_log_file_path, "r")
+
+        if self.hci_log_file_fd:
+            content=self.hci_log_file_fd.read()
+            self.hci_dump_log_text_browser.append(content)
+            self.hci_file_position=self.hci_log_file_fd.tell()
+
+        self.file_watcher = QFileSystemWatcher()
+        self.file_watcher.addPath(self.hci_log_file_path)
+        self.file_watcher.fileChanged.connect(self.update_log)
+        #self.logs_layout.addWidget(self.dump_log_output)
+
 
         # Set the main layout for the test application window
 
@@ -1382,3 +1418,25 @@ class TestApplication(QWidget):
 
         self.setLayout(self.main_grid_layout)
         QTimer.singleShot(1000, self.load_connected_devices)
+
+    def update_log(self):
+        if self.hci_log_file_fd:
+            self.hci_log_file_fd.seek(self.hci_file_position)
+            content = self.hci_log_file_fd.read()
+            self.hci_file_position = self.hci_log_file_fd.tell()
+            self.hci_dump_log_text_browser.append(content)
+
+        elif self.bluetoothd_log_file_fd:
+            self.bluetoothd_log_file_fd.seek(self.bluetoothd_file_position)
+            content = self.bluetoothd_log_file_fd.read()
+            self.bluetoothd_file_position = self.hci_log_file_fd.tell()
+            self.bluetoothd_log_text_browser.append(content)
+
+        elif self.pulseaudio_log_file_fd:
+            self.pulseaudio_log_file_fd.seek(self.pulseaudio_file_position)
+            content = self.pulseaudio_log_file_fd.read()
+            self.pulseaudio_file_position = self.pulseaudio_log_file_fd.tell()
+            self.pulseaudio_log_text_browser.append(content)
+
+
+ so in the logs,, wverything is working fine but one log is coming two times .. same log 2 times
