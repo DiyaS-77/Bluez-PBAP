@@ -1,0 +1,72 @@
+2025-08-04 16:54:03.716573 < HCI Command: Create Connection (0x01|0x0005) plen 13
+    bdaddr 20:32:C6:7B:91:1C ptype 0xcc18 rswitch 0x01 clkoffset 0x0000
+    Packet type: DM1 DM3 DM5 DH1 DH3 DH5 
+2025-08-04 16:54:03.831852 > HCI Event: Command Status (0x0f) plen 4
+    Create Connection (0x01|0x0005) status 0x00 ncmd 1
+
+2025-08-04 16:54:05.316870 > HCI Event: Role Change (0x12) plen 8
+    status 0x00 bdaddr 20:32:C6:7B:91:1C role 0x01
+    Role: Peripheral
+
+2025-08-04 16:54:05.344813 > HCI Event: Connect Complete (0x03) plen 11
+    status 0x00 handle 12 bdaddr 20:32:C6:7B:91:1C type ACL encrypt 0x00
+
+2025-08-04 16:54:05.345025 < HCI Command: Read Remote Supported Features (0x01|0x001b) plen 2
+    handle 12
+2025-08-04 16:54:05.345786 > HCI Event: Command Status (0x0f) plen 4
+    Read Remote Supported Features (0x01|0x001b) status 0x00 ncmd 1
+2025-08-04 16:54:05.350797 > HCI Event: Max Slots Change (0x1b) plen 3
+    handle 12 slots 5
+
+2025-08-04 16:54:05.363782 > HCI Event: Read Remote Supported Features (0x0b) plen 11
+    status 0x00 handle 12
+    Features: 0xbf 0xfe 0xcf 0xfe 0xdb 0xff 0x7b 0x87
+2025-08-04 16:54:05.363873 < HCI Command: Read Remote Extended Features (0x01|0x001c) plen 3
+    handle 12 page 1
+
+2025-08-04 16:54:05.364792 > HCI Event: Command Status (0x0f) plen 4
+    Read Remote Extended Features (0x01|0x001c) status 0x00 ncmd 1
+
+2025-08-04 16:54:05.438815 > HCI Event: Read Remote Extended Features (0x23) plen 13
+    status 0x00 handle 12 page 1 max 2
+    Features: 0x0f 0x00 0x00 0x00 0x00 0x00 0x00 0x00
+2025-08-04 16:54:05.438945 < HCI Command: Remote Name Request (0x01|0x0019) plen 10
+    bdaddr 20:32:C6:7B:91:1C mode 2 clkoffset 0x0000
+2025-08-04 16:54:05.438982 < ACL data: handle 12 flags 0x00 dlen 10
+    L2CAP(s): Info req: type 2
+
+2025-08-04 16:54:05.439799 > HCI Event: Command Status (0x0f) plen 4
+    Remote Name Request (0x01|0x0019) status 0x00 ncmd 1
+
+2025-08-04 16:54:05.521847 > HCI Event: Remote Name Req Complete (0x07) plen 255
+    status 0x00 bdaddr 20:32:C6:7B:91:1C name 'D7......'
+
+2025-08-04 16:54:05.570576 > ACL data: handle 12 flags 0x02 dlen 16
+    L2CAP(s): Info rsp: type 2 result 0
+      Extended feature mask 0x02a8
+        Enhanced Retransmission mode
+        FCS Option
+        Fixed Channels
+        Unicast Connectless Data Reception
+2025-08-04 16:54:05.570837 < ACL data: handle 12 flags 0x00 dlen 10
+    L2CAP(s): Info req: type 3
+
+2025-08-04 16:54:05.573790 > HCI Event: Number of Completed Packets (0x13) plen 5
+    handle 12 packets 2
+
+2025-08-04 16:54:05.638105 > ACL data: handle 12 flags 0x02 dlen 20
+    L2CAP(s): Info rsp: type 3 result 0
+      Fixed channel list 0x4010c00000000f6
+        L2CAP Signalling Channel
+        L2CAP Connless
+
+2025-08-04 16:54:07.450268 < HCI Command: Disconnect (0x01|0x0006) plen 3
+    handle 12 reason 0x13
+    Reason: Remote User Terminated Connection
+
+2025-08-04 16:54:07.451720 > HCI Event: Command Status (0x0f) plen 4
+    Disconnect (0x01|0x0006) status 0x00 ncmd 1
+
+2025-08-04 16:54:07.532806 > HCI Event: Disconn Complete (0x05) plen 4
+    status 0x00 handle 12 reason 0x16
+    Reason: Connection Terminated by Local Host
