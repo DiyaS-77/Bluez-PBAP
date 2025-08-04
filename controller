@@ -290,23 +290,30 @@ class TestControllerUI(QWidget):
             parameters.append(text_value)
 
         setattr(self, f"{self.ogf}_values", parameters)
-        self.log.debug(f"{self.ocf=} {self.ogf=} {parameters=}")
-        run_hci_cmd(self.ocf, self.ogf, self.interface, self.log, parameters)
-        if self.ogf == "Create Connection":
+
+        # Automatically send follow-up commands after Create Connection
+        if self.ocf == "Link Control commands" and self.ogf == "Create Connection":
+            import time
+            time.sleep(1)  # Wait briefly for connection to establish
+
             # Attempt to extract connection handle from logs
             try:
                 with open(self.log_file_path, "r") as log_file:
-                    log_lines = log_file.readlines()
-                for line in reversed(log_lines):
-                    if "Connect Complete" in line and "handle" in line:
-                        match = re.search(r"handle (\d+)", line)
-                        if match:
-                            handle_val = int(match.group(1))
-                            handle_hex = f"0x{handle_val:04X}"
-                            run_hci_cmd("Controller and Baseband commands", "Write Link Supervision Timeout", self.interface, self.log, [handle_hex, "0xFFFF"])
-                            break
+                    logs = log_file.read()
+                match = re.search(r"Connect Complete.*?handle (\w+)", logs)
+                if match:
+                    conn_handle = match.group(1)
+                    # Send Write Link Supervision Timeout
+                    run_hci_cmd("Controller and Baseband commands", "Write Link Supervision Timeout", self.interface, self.log, [f"0x{conn_handle}", "0xFFFF"])
+                    # Send Authentication Requested
+                    run_hci_cmd("Link Control commands", "Authentication Requested", self.interface, self.log, [f"0x{conn_handle}"])
+                    # Send Set Connection Encryption
+                    run_hci_cmd("Link Control commands", "Set Connection Encryption", self.interface, self.log, [f"0x{conn_handle}", "0x01"])
             except Exception as e:
-                self.log.debug(f"Failed to send Write Link Supervision Timeout: {e}")
+                self.log.debug(f"Post-connection automation failed: {e}")
+
+        self.log.debug(f"{self.ocf=} {self.ogf=} {parameters=}")
+        run_hci_cmd(self.ocf, self.ogf, self.interface, self.log, parameters)
 
     def reset_default_params(self):
         """
