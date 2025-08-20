@@ -1,0 +1,12 @@
+adapter_interface='org.bluez.Adapter1'
+bluez_service='org.bluez'
+bus_path='/org/bluez'
+device_interface="org.bluez.Device1"
+object_manager_interface="org.freedesktop.DBus.ObjectManager"
+properties_interface="org.freedesktop.DBus.Properties"
+dbus_command = "/usr/local/bluez/dbus-1.12.20/bin/dbus-daemon --system --nofork --nopidfile"
+dbusd_kill_command="killall -9 /usr/local/bluez/dbus-1.12.20/bin/dbus-daemon"
+bluetoothd_command = "/usr/local/bluez/bluez-tools/libexec/bluetooth/bluetoothd -nd --compat"
+bluetoothd_kill_command="killall -9 /usr/local/bluez/bluez-tools/libexec/bluetooth/bluetoothd"
+hcidump_command = "/usr/local/bluez/bluez-tools/bin/hcidump -i {interface} -Xt"
+hciconfig_up_command = "hciconfig {interface} up"
