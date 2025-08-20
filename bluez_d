@@ -1,0 +1,135 @@
+import dbus
+import dbus.mainloop.glib
+import dbus.service
+import os
+import subprocess
+
+from libraries.bluetooth import constants
+from Utils.utils import run
+
+class BluetoothDeviceManager:
+    """A class for managing Bluetooth devices using the BlueZ D-Bus API."""
+    _instance=None
+
+    @classmethod
+    def get_instance(cls, *args, **kwargs):
+        if cls._instance is None:
+            cls._instance = cls(*args, **kwargs)
+        return cls._instance
+
+    def __init__(self, log=None):
+        """Initialize the BluetoothDeviceManager by setting up the system bus and adapter."""
+        self.log = log
+        self.adapter = None
+        self.adapter_path = None
+        self.adapter_proxy = None
+        self.bd_address = None
+        self.bluetoothd_log_name = None
+        self.bus = None
+        self.controllers_list = {}
+        self.device_address = None
+        self.devices = {}
+        self.interface = None
+        self.start_daemons()
+
+    def start_daemons(self):
+        """Initializes and starts the necessary background services for Bluetooth management."""
+        self.start_dbus_daemon()
+        self.start_bluetooth_daemon()
+
+    def start_dbus_daemon(self):
+        """Cleans any existing custom D-Bus daemons and starts a new one."""
+        self.log.info("Cleaning up existing  D-Bus daemons...")
+        subprocess.run(
+            constants.dbusd_kill_command.split(),
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+        self.log.info("Starting  D-Bus daemon...")
+        subprocess.Popen(constants.dbus_command.split(),
+                         stdout=subprocess.DEVNULL,
+                         stderr=subprocess.DEVNULL
+                         )
+        self.log.info("D-Bus daemon started successfully.")
+
+    def start_bluetooth_daemon(self):
+        """Starts the bluetooth daemon and begins logging its output."""
+        self.log.info("Killing any running bluetooth daemons..")
+        subprocess.run(
+            constants.bluetoothd_kill_command.split(),
+            check=False,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+        self.bluetoothd_log_name = os.path.join(self.log.log_path, "bluetoothd.log")
+        self.log.info("Starting bluetooth daemon...")
+        subprocess.Popen(
+            constants.bluetoothd_command.split(),
+            stdout=open(self.bluetoothd_log_name, 'a+'),
+            stderr=subprocess.STDOUT,
+            bufsize=1,
+            universal_newlines=True
+        )
+        self.log.info("Bluetoothd logs started %s",self.bluetoothd_log_name)
+
+    def initialize_adapter(self, interface):
+        """Initializes the Bluetooth adapter (controller) for the given interface.
+
+        Args:
+            interface : The name of the Bluetooth interface
+        """
+        self.bus=dbus.SystemBus()
+        self.interface = interface
+        if self.interface:
+            self.adapter_path = f'/org/bluez/{self.interface}'
+            self.adapter_proxy = self.bus.get_object(constants.bluez_service, self.adapter_path)
+            self.adapter = dbus.Interface(self.adapter_proxy, constants.adapter_interface)
+
+    def get_dbus_managed_objects(self):
+        """Retrieves all managed D-Bus objects from the BlueZ service.
+
+        Returns:
+            A dictionary representing the object hierarchy and interfaces exposed by the BlueZ service.
+        """
+        object_manager = dbus.Interface(
+            self.bus.get_object(constants.bluez_service, "/"),
+            constants.object_manager_interface
+        )
+        return object_manager.GetManagedObjects()
+
+    def get_paired_devices(self, objects):
+        """Extracts all Bluetooth devices that are currently paired from the given D-Bus object map.
+
+        Args:
+            The D-Bus object dictionary.
+        Returns:
+            A dictionary of paired devices.
+        """
+        paired_devices = {}
+        for path, interfaces in objects.items():
+            if constants.device_interface in interfaces:
+                device = interfaces[constants.device_interface]
+                if device.get("Paired") and device.get("Adapter") == self.adapter_path:
+                    address = device.get("Address")
+                    name = device.get("Name", "Unknown")
+                    paired_devices[address] = name
+        return paired_devices
+
+    def get_connected_devices(self, objects):
+        """Extracts all currently connected Bluetooth devices from the given D-Bus object map.
+
+        Args:
+            objects: The D-Bus object dictionary.
+        Returns:
+            A dictionary of connected devices.
+        """
+        connected_devices = {}
+        for path, interfaces in objects.items():
+            if constants.device_interface in interfaces:
+                device = interfaces[constants.device_interface]
+                if device.get("Connected") and device.get("Adapter") == self.adapter_path:
+                    address = device.get("Address")
+                    name = device.get("Name", "Unknown")
+                    connected_devices[address] = name
+        return connected_devices
