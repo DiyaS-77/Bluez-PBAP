@@ -1,0 +1,38 @@
+🔹 Visual / Look Improvements
+	1.	Section Separation
+	•	Use cards or group boxes with light borders/shadows for each functionality (e.g., “Media Control”, “Connection Controls”).
+	•	This avoids everything blending into the same pale blue background.
+	2.	Button Styling
+	•	Make buttons consistent in size and aligned horizontally.
+	•	Add icons (▶️ Play, ⏸ Pause, ⏭ Next, ⏮ Previous, ⏪ Rewind).
+	•	Use color coding only where needed: e.g., Play = green, Pause = yellow, Disconnect = red.
+	3.	Typography
+	•	Increase heading size (A2DP Functionality) so it feels like a title.
+	•	Use bold text for important labels, lighter text for details.
+	4.	Spacing & Alignment
+	•	Add padding between groups (e.g., between “Media Control” buttons and Connect/Disconnect).
+	•	Center-align or grid-align buttons for a cleaner look.
+	5.	Tab Highlighting
+	•	When “A2DP” is selected, highlight it with a stronger color/border so the user knows the active profile.
+	•	Keep inactive tabs slightly dim.
+
+⸻
+
+🔹 Feature Improvements
+	1.	Media Feedback
+	•	Show the current playback state (e.g., “Now Playing: [Track Name]” or “Paused”).
+	•	Add a simple progress bar / slider for current track timeline.
+	2.	Volume Control
+	•	Add a small volume slider with mute/unmute button.
+	3.	Device-Specific Info
+	•	Display the connected device’s name, codec (SBC, AAC, aptX), and connection quality (signal strength).
+	4.	Connection Actions
+	•	Replace the plain Connect/Disconnect/Unpair buttons with:
+	•	✅ Connect (green)
+	•	🔌 Disconnect (red)
+	•	❌ Unpair (grey)
+	•	Place them below device details instead of floating at the bottom for consistency.
+	5.	Advanced Features (optional)
+	•	Logging panel (small collapsible window) showing last A2DP/OPP events.
+	•	Status indicators (🔵 Connected / ⚪ Disconnected).
+	•	For OPP profile: drag-and-drop area or “Browse File / Send File” buttons.
