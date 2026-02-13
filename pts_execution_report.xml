@@ -1,0 +1,19 @@
+<?xml version='1.0' encoding='utf-8'?>
+<PTSExecutionReport>
+  <ExecutionInfo>
+    <Project>GAP</Project>
+    <ExecutionTime>2026-02-13 00:40:34</ExecutionTime>
+    <Total>1</Total>
+    <Passed>0</Passed>
+    <Failed>0</Failed>
+    <Inconclusive>1</Inconclusive>
+  </ExecutionInfo>
+  <TestCases>
+    <TestCase>
+      <TestCaseID>GAP/ADV/BV-03-C</TestCaseID>
+      <Date>2026-02-13 00:40:34</Date>
+      <Verdict>INDCSV</Verdict>
+      <FailureReason>Failed to scan advertising packets.</FailureReason>
+    </TestCase>
+  </TestCases>
+</PTSExecutionReport>
