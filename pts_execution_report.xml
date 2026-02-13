@@ -1,19 +1,102 @@
-<?xml version='1.0' encoding='utf-8'?>
-<PTSExecutionReport>
-  <ExecutionInfo>
-    <Project>GAP</Project>
-    <ExecutionTime>2026-02-13 00:40:34</ExecutionTime>
-    <Total>1</Total>
-    <Passed>0</Passed>
-    <Failed>0</Failed>
-    <Inconclusive>1</Inconclusive>
-  </ExecutionInfo>
-  <TestCases>
-    <TestCase>
-      <TestCaseID>GAP/ADV/BV-03-C</TestCaseID>
-      <Date>2026-02-13 00:40:34</Date>
-      <Verdict>INDCSV</Verdict>
-      <FailureReason>Failed to scan advertising packets.</FailureReason>
-    </TestCase>
-  </TestCases>
-</PTSExecutionReport>
+import os
+from datetime import datetime
+
+def generate_pts_html_report(project, results, output_dir="reports"):
+    """
+    Generate simple HTML table report for PTS execution.
+    """
+
+    os.makedirs(output_dir, exist_ok=True)
+
+    timestamp = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    filename = f"{project}_PTS_Report_{timestamp}.html"
+    filepath = os.path.join(output_dir, filename)
+
+    total = len(results)
+    passed = sum(1 for r in results if r["verdict"] == "PASS")
+    failed = sum(1 for r in results if r["verdict"] == "FAIL")
+    inconclusive = sum(1 for r in results if r["verdict"] == "INDCSV")
+
+    html = f"""
+<html>
+<head>
+<title>PTS Execution Report</title>
+<style>
+body {{
+    font-family: Arial;
+}}
+table {{
+    border-collapse: collapse;
+    width: 100%;
+}}
+th, td {{
+    border: 1px solid black;
+    padding: 8px;
+    text-align: left;
+}}
+th {{
+    background-color: #f2f2f2;
+}}
+.pass {{
+    color: green;
+    font-weight: bold;
+}}
+.fail {{
+    color: red;
+    font-weight: bold;
+}}
+.indcsv {{
+    color: orange;
+    font-weight: bold;
+}}
+</style>
+</head>
+<body>
+
+<h2>PTS Execution Report</h2>
+
+<p>
+Project: {project}<br>
+Execution Time: {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}<br>
+Total: {total}<br>
+Passed: {passed}<br>
+Failed: {failed}<br>
+Inconclusive: {inconclusive}
+</p>
+
+<table>
+<tr>
+<th>Index</th>
+<th>Test Case ID</th>
+<th>Verdict</th>
+<th>Failure Reason</th>
+</tr>
+"""
+
+    for i, r in enumerate(results, 1):
+
+        verdict_class = "pass"
+        if r["verdict"] == "FAIL":
+            verdict_class = "fail"
+        elif r["verdict"] == "INDCSV":
+            verdict_class = "indcsv"
+
+        html += f"""
+<tr>
+<td>{i}</td>
+<td>{r["testcase"]}</td>
+<td class="{verdict_class}">{r["verdict"]}</td>
+<td>{r["reason"] or ""}</td>
+</tr>
+"""
+
+    html += """
+</table>
+</body>
+</html>
+"""
+
+    with open(filepath, "w") as f:
+        f.write(html)
+
+    return filepath
